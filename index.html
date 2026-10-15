@@ -264,7 +264,7 @@ class Component extends DCLogic {
     ['a','b'].forEach(k=>{
       const el=document.querySelector(`[data-marquee="${k}"]`); if(!el) return;
       const half=el.scrollWidth/2; if(!half) return;
-      if(!this.paused[k]) this.off[k]+=(k==='a'?1:-1)*speed*dt;
+      if(!this.paused[k]) this.off[k]+=(k==='a'?1.35:-1)*speed*dt;
       let o=((this.off[k]%half)+half)%half;
       el.style.transform=`translate3d(${-o}px,0,0)`;
     });
