@@ -23,12 +23,9 @@ button{font-family:inherit}
 @media (max-width:600px){
 [data-hero-cta]{max-width:300px!important;margin-top:18px!important;gap:8px!important}
 [data-hero-cta] [data-cta]{min-height:46px!important;padding:0 16px!important;font-size:0.85rem!important;letter-spacing:0.14em!important}
-[data-hero-cta] [data-cd-box]{padding:7px 14px!important;gap:10px!important;flex-wrap:nowrap!important;justify-content:center!important}
-[data-hero-cta] [data-cd-label]{font-size:0.6rem!important;letter-spacing:0.14em!important;gap:7px!important}
-[data-hero-cta] [data-cd-long]{display:none!important}
-[data-hero-cta] [data-cd-short]{display:inline!important}
+[data-hero-cta] [data-cd-box]{padding:10px 14px!important;gap:10px!important;flex-wrap:nowrap!important;justify-content:center!important}
+[data-hero-cta] [data-cd-label]{font-size:0.62rem!important;letter-spacing:0.18em!important;gap:7px!important}
 [data-hero-cta] [data-cd-label] [data-blink]{width:5px!important;height:5px!important}
-[data-hero-cta] [data-cd-time]{font-size:1.15rem!important;flex-shrink:0}
 }
 </style>
 </helmet>
@@ -50,9 +47,8 @@ button{font-family:inherit}
       <span data-shine="1" style="position:absolute;top:-20%;bottom:-20%;left:0;width:38%;pointer-events:none;background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,247,225,0.75) 50%,rgba(255,255,255,0) 100%);transform:translateX(-160%) skewX(-18deg)"></span>
       <span style="position:relative">{{ ctaLabel }}</span>
     </a>
-    <div data-cd-box="1" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 12px;padding:8px 16px;border:1px solid rgba(140,110,51,0.55);background:rgba(20,20,20,0.6)">
-      <span data-cd-label="1" style="display:flex;align-items:center;gap:8px;font-size:0.68rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#C9A45C;white-space:nowrap"><span data-blink="1" style="width:6px;height:6px;border-radius:50%;background:#E6C98A;box-shadow:0 0 10px #C9A45C;flex-shrink:0"></span><span data-cd-long="1">Últimas plazas disponibles, el acceso cerrará en:</span><span data-cd-short="1" style="display:none">Últimas plazas · cierra en</span></span>
-      <span data-cd-time="1" style="display:flex;align-items:baseline;gap:2px;font-family:'Montserrat',sans-serif;font-weight:300;line-height:1;font-size:1.85rem;letter-spacing:0.06em;color:#E6C98A;text-shadow:0 0 14px rgba(201,164,92,0.45);font-variant-numeric:tabular-nums"><span data-cd="m">30</span><span style="color:#C9A45C">:</span><span data-cd="s">00</span></span>
+    <div data-cd-box="1" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 12px;padding:12px 16px;border:1px solid rgba(140,110,51,0.55);background:rgba(20,20,20,0.6)">
+      <span data-cd-label="1" style="display:flex;align-items:center;gap:8px;font-size:0.68rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#C9A45C;white-space:nowrap"><span data-blink="1" style="width:6px;height:6px;border-radius:50%;background:#E6C98A;box-shadow:0 0 10px #C9A45C;flex-shrink:0"></span>Últimas plazas disponibles</span>
     </div>
   </div>
 </section>
@@ -235,14 +231,7 @@ class Component extends DCLogic {
   }
   componentDidUpdate(){ this.arm(); }
   tickCountdown(){
-    const D=30*60*1000; let end=0;
-    try{end=+localStorage.getItem('reveltia.cd30')||0}catch(e){}
-    const now=Date.now();
-    if(!end||end<=now){ end=now+D-((now-(end||now))%D||0); if(end<=now) end=now+D; try{localStorage.setItem('reveltia.cd30',String(end))}catch(e){} }
-    const left=Math.max(0,Math.ceil((end-now)/1000)), m=Math.floor(left/60), s=left%60;
-    document.querySelectorAll('[data-cd="m"]').forEach(el=>el.textContent=String(m).padStart(2,'0'));
-    document.querySelectorAll('[data-cd="s"]').forEach(el=>el.textContent=String(s).padStart(2,'0'));
-    const on=(now/600|0)%2===0; document.querySelectorAll('[data-blink]').forEach(el=>el.style.opacity=on?'1':'0.25');
+    const on=(Date.now()/600|0)%2===0; document.querySelectorAll('[data-blink]').forEach(el=>el.style.opacity=on?'1':'0.25');
   }
   componentWillUnmount(){ clearInterval(this.cdTimer); cancelAnimationFrame(this.raf); window.removeEventListener('blur',this.onBlur); document.removeEventListener('pointerdown',this.onDown); window.removeEventListener('resize',this.onResize); window.removeEventListener('scroll',this.onScroll); this.io&&this.io.disconnect(); }
   arm(){
