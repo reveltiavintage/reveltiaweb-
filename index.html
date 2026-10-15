@@ -61,7 +61,7 @@ button{font-family:inherit}
     <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.05;font-size:clamp(2.2rem,5.6vw,4rem)">Ellos ya están <em style="font-style:italic;font-weight:600;color:#C9A45C">vendiendo.</em></h2>
   </div>
 
-  <div onMouseEnter="{{ pauseA }}" onMouseLeave="{{ playA }}" onPointerDown="{{ tapA }}" style="margin-top:clamp(36px,5vw,56px);overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)">
+  <div onPointerEnter="{{ pauseA }}" onPointerLeave="{{ playA }}" onPointerDown="{{ dragStart }}" onClickCapture="{{ dragClick }}" onDragStart="{{ noNativeDrag }}" style="touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab;margin-top:clamp(36px,5vw,56px);overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)">
     <div data-marquee="a" style="display:flex;gap:16px;width:max-content;will-change:transform">
       <sc-for list="{{ testimonials }}" as="t" hint-placeholder-count="8">
         <article style="flex:0 0 auto;width:clamp(200px,52vw,260px);display:flex;flex-direction:column;gap:14px">
@@ -233,7 +233,7 @@ class Component extends DCLogic {
   tickCountdown(){
     const on=(Date.now()/600|0)%2===0; document.querySelectorAll('[data-blink]').forEach(el=>el.style.opacity=on?'1':'0.25');
   }
-  componentWillUnmount(){ clearInterval(this.cdTimer); cancelAnimationFrame(this.raf); window.removeEventListener('blur',this.onBlur); document.removeEventListener('pointerdown',this.onDown); window.removeEventListener('resize',this.onResize); window.removeEventListener('scroll',this.onScroll); this.io&&this.io.disconnect(); }
+  componentWillUnmount(){ this.dragEnd&&this.drag&&this.dragEnd({pointerId:this.drag.id}); clearInterval(this.cdTimer); cancelAnimationFrame(this.raf); window.removeEventListener('blur',this.onBlur); document.removeEventListener('pointerdown',this.onDown); window.removeEventListener('resize',this.onResize); window.removeEventListener('scroll',this.onScroll); this.io&&this.io.disconnect(); }
   arm(){
     if(this.reduce || !(this.props.revealOnScroll ?? true)) return;
     document.querySelectorAll('[data-reveal]').forEach(el=>{
@@ -253,7 +253,7 @@ class Component extends DCLogic {
     ['a','b'].forEach(k=>{
       const el=document.querySelector(`[data-marquee="${k}"]`); if(!el) return;
       const half=el.scrollWidth/2; if(!half) return;
-      if(!this.paused[k]) this.off[k]+=(k==='a'?1.35:-1)*speed*dt;
+      if(!this.paused[k] && !(k==='a'&&this.drag)) this.off[k]+=(k==='a'?1.35:-1)*speed*dt;
       let o=((this.off[k]%half)+half)%half;
       el.style.transform=`translate3d(${-o}px,0,0)`;
     });
@@ -263,6 +263,31 @@ class Component extends DCLogic {
     const g=0.35+0.35*(0.5+0.5*Math.sin(now/900));
     document.querySelectorAll('[data-glow]').forEach(s=>{s.style.opacity=g.toFixed(3);});
   }
+  dragStart = e=>{
+    if(e.pointerType==='mouse'&&e.button!==0) return;
+    this.drag={id:e.pointerId,x:e.clientX,y:e.clientY,off:this.off.a,moved:false};
+    window.addEventListener('pointermove',this.dragMove,{passive:true});
+    window.addEventListener('pointerup',this.dragEnd);
+    window.addEventListener('pointercancel',this.dragEnd);
+  };
+  dragMove = e=>{
+    const d=this.drag; if(!d||e.pointerId!==d.id) return;
+    const dx=e.clientX-d.x;
+    if(!d.moved&&Math.abs(dx)>8&&Math.abs(dx)>Math.abs(e.clientY-d.y)){
+      d.moved=true;
+      if(this.state.playing!==-1){this.hold=false;this.paused.a=false;this.setState({playing:-1});}
+    }
+    if(d.moved) this.off.a=d.off-dx;
+  };
+  dragEnd = e=>{
+    const d=this.drag; if(!d||e.pointerId!==d.id) return;
+    this.suppressClick=d.moved; this.drag=null;
+    window.removeEventListener('pointermove',this.dragMove);
+    window.removeEventListener('pointerup',this.dragEnd);
+    window.removeEventListener('pointercancel',this.dragEnd);
+  };
+  dragClick = e=>{ if(this.suppressClick){e.preventDefault();e.stopPropagation();this.suppressClick=false;} };
+  noNativeDrag = e=>e.preventDefault();
   thumbFallback = e=>{const im=e.currentTarget;if(!im||im.dataset.fb)return;im.dataset.fb='1';Object.assign(im.style,{objectFit:'cover',top:'-16.7%',bottom:'auto',height:'133.4%'});im.src=im.dataset.hq;};
   thumbCheck = e=>{const im=e.currentTarget;if(im&&!im.dataset.fb&&im.naturalWidth<=120)this.thumbFallback(e);};
   renderVals(){
@@ -272,7 +297,7 @@ class Component extends DCLogic {
       ctaLabel:LABELS[this.props.ctaLabel ?? 'access'] || LABELS.access,
       showCaptures:this.props.showCaptures ?? true,
       wave1:this.waves[0], wave2:this.waves[1], wave3:this.waves[2],
-      pauseA:()=>{this.paused.a=true}, playA:()=>{if(!this.hold)this.paused.a=false}, tapA:e=>{if(e.pointerType!=='mouse')this.paused.a=!this.paused.a},
+      pauseA:e=>{if(e.pointerType==='mouse')this.paused.a=true}, playA:e=>{if(e.pointerType==='mouse'&&!this.hold)this.paused.a=false}, dragStart:this.dragStart, dragClick:this.dragClick, noNativeDrag:this.noNativeDrag,
       pauseB:()=>{this.paused.b=true}, playB:()=>{this.paused.b=false}, tapB:e=>{if(e.pointerType!=='mouse')this.paused.b=!this.paused.b},
       testimonials:[...TESTI,...TESTI].map(([name,result],k)=>{const i=k%TESTI.length,v=TVIDEOS[i],sh=!!SHORTS[i],f=(this.props['focus'+(i+1)] ?? 50);const on=!!v&&this.state.playing===k;return {name,result,slot:`[TESTIMONIO_${i+1}]`,noVideo:!v,showFrame:on,showThumb:!!v&&!on,play:()=>{this.hold=true;this.paused.a=true;this.setState({playing:k});},playLabel:`Ver testimonio de ${name}`,thumb:v?`https://i.ytimg.com/vi/${v}/maxresdefault.jpg`:'',thumbHq:v?`https://i.ytimg.com/vi/${v}/hqdefault.jpg`:'',bgPos:sh?'50% 50%':`${f}% 50%`,left:sh?'0%':(-216.05*f/100).toFixed(2)+'%',w:sh?'100%':'316.05%',embed:on?`https://www.youtube-nocookie.com/embed/${v}?rel=0&modestbranding=1&playsinline=1&autoplay=1`:''};}),
       captures:[...Array(16)].map((_,k)=>`capturas/${String(k+1).padStart(2,'0')}.jpg`),
