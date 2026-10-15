@@ -18,6 +18,13 @@ html,body{margin:0;background:#0A0A0A;color:#EDE3CF;font-family:'Manrope',sans-s
 a{color:#C9A45C;text-decoration:none;transition:color 250ms}
 a:hover{color:#E6C98A}
 button{font-family:inherit}
+@media (max-width:600px){
+[data-hero-cta]{max-width:340px!important;margin-top:20px!important;gap:10px!important}
+[data-hero-cta] [data-cta]{min-height:54px!important;padding:0 20px!important;font-size:0.95rem!important;letter-spacing:0.14em!important}
+[data-hero-cta] [data-cd-box]{padding:6px 10px!important;gap:4px 8px!important}
+[data-hero-cta] [data-cd-label]{font-size:0.56rem!important;letter-spacing:0.12em!important;white-space:normal!important;text-align:center}
+[data-hero-cta] [data-cd-time]{font-size:1.3rem!important}
+}
 </style>
 </helmet>
 <main style="background:#0A0A0A;min-height:100vh;overflow-x:clip;font-family:'Manrope',sans-serif">
@@ -38,9 +45,9 @@ button{font-family:inherit}
       <span data-shine="1" style="position:absolute;top:-20%;bottom:-20%;left:0;width:38%;pointer-events:none;background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,247,225,0.75) 50%,rgba(255,255,255,0) 100%);transform:translateX(-160%) skewX(-18deg)"></span>
       <span style="position:relative">{{ ctaLabel }}</span>
     </a>
-    <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 12px;padding:8px 16px;border:1px solid rgba(140,110,51,0.55);background:rgba(20,20,20,0.6)">
-      <span style="display:flex;align-items:center;gap:8px;font-size:0.68rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#C9A45C;white-space:nowrap"><span data-blink="1" style="width:6px;height:6px;border-radius:50%;background:#E6C98A;box-shadow:0 0 10px #C9A45C;flex-shrink:0"></span>Últimas plazas disponibles, el acceso cerrará en:</span>
-      <span style="display:flex;align-items:baseline;gap:2px;font-family:'Montserrat',sans-serif;font-weight:300;line-height:1;font-size:1.85rem;letter-spacing:0.06em;color:#E6C98A;text-shadow:0 0 14px rgba(201,164,92,0.45);font-variant-numeric:tabular-nums"><span data-cd="m">30</span><span style="color:#C9A45C">:</span><span data-cd="s">00</span></span>
+    <div data-cd-box="1" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 12px;padding:8px 16px;border:1px solid rgba(140,110,51,0.55);background:rgba(20,20,20,0.6)">
+      <span data-cd-label="1" style="display:flex;align-items:center;gap:8px;font-size:0.68rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:#C9A45C;white-space:nowrap"><span data-blink="1" style="width:6px;height:6px;border-radius:50%;background:#E6C98A;box-shadow:0 0 10px #C9A45C;flex-shrink:0"></span>Últimas plazas disponibles, el acceso cerrará en:</span>
+      <span data-cd-time="1" style="display:flex;align-items:baseline;gap:2px;font-family:'Montserrat',sans-serif;font-weight:300;line-height:1;font-size:1.85rem;letter-spacing:0.06em;color:#E6C98A;text-shadow:0 0 14px rgba(201,164,92,0.45);font-variant-numeric:tabular-nums"><span data-cd="m">30</span><span style="color:#C9A45C">:</span><span data-cd="s">00</span></span>
     </div>
   </div>
 </section>
